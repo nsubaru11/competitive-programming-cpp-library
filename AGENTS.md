@@ -9,7 +9,7 @@
 
 ## Coding Conventions
 
-- Target C++23 and follow `.clang-format`.
+- Target C++23 and follow the `.clang-format` at the root of the parent repository.
 - Use tabs for indentation and keep a trailing newline at end-of-file.
 - One public class per header at `src/lib/<package>/<ClassName>.hpp`, starting with `#pragma once`.
 - Headers must include what they use and contain no `main`.
