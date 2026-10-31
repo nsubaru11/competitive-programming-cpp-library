@@ -1,0 +1,6 @@
+# すべてテキストファイルとして扱い、常に LF で保存
+* text=auto eol=lf
+
+# Windows特有のファイルはCRLFを使用
+*.bat text eol=crlf
+*.cmd text eol=crlf
