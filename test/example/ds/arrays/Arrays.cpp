@@ -10,7 +10,7 @@ int main() {
 	cin >> n;
 	cin >> q;
 	Arrays<int> arr(n);
-	arr.setAll([](int i) { return i + 1; });
+	arr.set_all([](int i) { return i + 1; });
 	while (q-- > 0) {
 		int t = 0;
 		cin >> t;
@@ -28,7 +28,7 @@ int main() {
 			int k = 0;
 			cin >> k;
 			k %= n;
-			arr.lShift(k);
+			arr.rotate_left(k);
 		}
 	}
 	return 0;

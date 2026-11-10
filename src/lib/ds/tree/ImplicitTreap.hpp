@@ -12,23 +12,23 @@
 // a[0],a[1],a[2],...,a[k],...
 //
 template <typename T>
-struct node_t {
+struct ImplicitTreapNode {
 	T val; // 値
-	node_t* lch;
-	node_t* rch;
+	ImplicitTreapNode* lch;
+	ImplicitTreapNode* rch;
 	double pri; // 優先度
 	int cnt; // 部分木のサイズ
 	T min_val;
 	T lazy_val;
 	bool lazy;
-	node_t(T v, double p) : val(v), lch(nullptr), rch(nullptr), pri(p), cnt(1), min_val(v), lazy_val(0), lazy(false) {}
-	~node_t() {
+	ImplicitTreapNode(T v, double p) :
+			val(v), lch(nullptr), rch(nullptr), pri(p), cnt(1), min_val(v), lazy_val(0), lazy(false) {}
+	~ImplicitTreapNode() {
 		delete lch;
 		delete rch;
 	}
-	static void push(node_t* t) {
-		if (!t)
-			return;
+	static void push(ImplicitTreapNode* t) {
+		if (!t) return;
 		if (t->lazy) {
 			t->val += t->lazy_val;
 			t->min_val += t->lazy_val;
@@ -44,9 +44,9 @@ struct node_t {
 			t->lazy = false;
 		}
 	}
-	static int count(node_t* t) { return t ? t->cnt : 0; }
-	static int min(node_t* t) { return t ? t->min_val : std::numeric_limits<T>::max(); }
-	static node_t* update(node_t* t) {
+	static int count(ImplicitTreapNode* t) { return t ? t->cnt : 0; }
+	static int min(ImplicitTreapNode* t) { return t ? t->min_val : std::numeric_limits<T>::max(); }
+	static ImplicitTreapNode* update(ImplicitTreapNode* t) {
 		assert(t != nullptr);
 		push(t);
 		t->cnt = count(t->lch) + count(t->rch) + 1;
@@ -55,9 +55,8 @@ struct node_t {
 		t->min_val = std::min({min(t->lch), min(t->rch), t->val});
 		return t;
 	}
-	static node_t* merge(node_t* l, node_t* r) {
-		if (!l || !r)
-			return (!l) ? r : l;
+	static ImplicitTreapNode* merge(ImplicitTreapNode* l, ImplicitTreapNode* r) {
+		if (!l || !r) return (!l) ? r : l;
 		update(l);
 		update(r);
 		if (l->pri > r->pri) {
@@ -75,9 +74,8 @@ struct node_t {
 	//    [0,1,2,...,k-1,k,...]
 	// -> [0,1,2,...,k-1] [k,...]
 	//
-	static std::pair<node_t*, node_t*> split(node_t* t, int k) {
-		if (!t)
-			return std::make_pair(nullptr, nullptr);
+	static std::pair<ImplicitTreapNode*, ImplicitTreapNode*> split(ImplicitTreapNode* t, int k) {
+		if (!t) return std::make_pair(nullptr, nullptr);
 		update(t);
 		if (k <= count(t->lch)) {
 			auto s = split(t->lch, k);
@@ -91,11 +89,11 @@ struct node_t {
 		assert(false);
 		return std::make_pair(nullptr, nullptr);
 	}
-	static node_t* insert(node_t* t, int k, node_t* new_t) {
+	static ImplicitTreapNode* insert(ImplicitTreapNode* t, int k, ImplicitTreapNode* new_t) {
 		auto s = split(t, k);
 		return merge(merge(s.first, new_t), s.second);
 	}
-	static std::pair<node_t*, node_t*> erase(node_t* t, int k) {
+	static std::pair<ImplicitTreapNode*, ImplicitTreapNode*> erase(ImplicitTreapNode* t, int k) {
 		auto sr = split(t, k + 1);
 		auto sl = split(sr.first, k);
 		return std::make_pair(merge(sl.first, sr.second), sl.second);
@@ -105,75 +103,73 @@ struct node_t {
 static int seed = 28313234; // seed はテキトー。デバッグしやすいように固定。
 template <typename T>
 class ImplicitTreap {
-	typedef node_t<T> node;
+	using Node = ImplicitTreapNode<T>;
 	std::function<double(void)> dice_;
 
 public:
-	node* root_;
+	Node* root_;
 	ImplicitTreap() : root_(nullptr) {
 		dice_ = std::bind(std::uniform_real_distribution<double>(0.0, 1.0), std::mt19937(seed));
 	}
 	~ImplicitTreap() {}
-	void insert(int k, T val) { root_ = node::insert(root_, k, new node(val, dice_())); }
-	void erase(int k) {
-		node* p;
-		std::tie(root_, p) = node::erase(root_, k);
+	void insert(int k, T val) { root_ = Node::insert(root_, k, new Node(val, dice_())); }
+	void remove_at(int k) {
+		Node* p;
+		std::tie(root_, p) = Node::erase(root_, k);
 		p->lch = p->rch = nullptr;
 		delete p;
 	}
 	// shift for [l,r) 区間ないの要素を一つずらす。
 	void shift(int l, int r) {
-		if (l == r - 1)
-			return;
+		if (l == r - 1) return;
 		assert(l < r);
-		auto sr = node::split(root_, r);
-		auto sl = node::split(sr.first, l);
-		auto lr = node::split(sl.second, r - l - 1);
-		root_ = node::merge(node::merge(sl.first, node::merge(lr.second, lr.first)), sr.second);
+		auto sr = Node::split(root_, r);
+		auto sl = Node::split(sr.first, l);
+		auto lr = Node::split(sl.second, r - l - 1);
+		root_ = Node::merge(Node::merge(sl.first, Node::merge(lr.second, lr.first)), sr.second);
 	}
-	int size() const { return node::count(root_); }
+	int size() const { return Node::count(root_); }
 	// add to [l,r)
 	void add(int l, int r, T val) {
 		assert(l < r);
-		auto sr = node::split(root_, r);
-		auto sl = node::split(sr.first, l);
+		auto sr = Node::split(root_, r);
+		auto sl = Node::split(sr.first, l);
 		auto lr = sl.second;
 		lr->lazy = true;
 		lr->lazy_val = val;
-		root_ = node::merge(node::merge(sl.first, lr), sr.second);
+		root_ = Node::merge(Node::merge(sl.first, lr), sr.second);
 	}
 	// min at [l,r)
 	T min(int l, int r) {
 		assert(l < r);
-		auto sr = node::split(root_, r);
-		auto sl = node::split(sr.first, l);
+		auto sr = Node::split(root_, r);
+		auto sl = Node::split(sr.first, l);
 		auto lr = sl.second;
-		T val = node::min(lr);
+		T val = Node::min(lr);
 		// 戻す
-		root_ = node::merge(node::merge(sl.first, lr), sr.second);
+		root_ = Node::merge(Node::merge(sl.first, lr), sr.second);
 		return val;
 	}
-	T at(int k) {
+	T get_by_index(int k) {
 		assert(0 <= k && k < size());
-		auto sr = node::split(root_, k + 1);
-		auto sl = node::split(sr.first, k);
+		auto sr = Node::split(root_, k + 1);
+		auto sl = Node::split(sr.first, k);
 		auto lr = sl.second;
 		assert(lr != nullptr);
 		T val = lr->val;
-		root_ = node::merge(node::merge(sl.first, lr), sr.second);
+		root_ = Node::merge(Node::merge(sl.first, lr), sr.second);
 		return val;
 	}
 	T get(int k) {
-		if (0 <= k && k < size())
-			return at(k);
+		if (0 <= k && k < size()) return get_by_index(k);
 		return 0;
 	}
 	void set(int k, T val) {
-		auto sr = node::split(root_, k + 1);
-		auto sl = node::split(sr.first, k);
+		auto sr = Node::split(root_, k + 1);
+		auto sl = Node::split(sr.first, k);
 		auto lr = sl.second;
 		assert(lr != nullptr);
 		lr->val = val;
-		root_ = node::merge(node::merge(sl.first, lr), sr.second);
+		root_ = Node::merge(Node::merge(sl.first, lr), sr.second);
 	}
 };

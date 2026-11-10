@@ -16,42 +16,42 @@ class Treap {
 				if (right == nullptr) {
 					right = new Node(k);
 					if (priority < right->priority) {
-						return rotateR();
+						return rotate_r();
 					}
 				} else {
 					right = right->add(k);
 					if (priority < right->priority) {
-						return rotateR();
+						return rotate_r();
 					}
 				}
 			} else if (key > k) {
 				if (left == nullptr) {
 					left = new Node(k);
 					if (priority < left->priority) {
-						return rotateL();
+						return rotate_l();
 					}
 				} else {
 					left = left->add(k);
 					if (priority < left->priority) {
-						return rotateL();
+						return rotate_l();
 					}
 				}
 			}
 			return this;
 		}
 
-		Node* rotateL() {
-			Node* newRoot = this->left;
-			this->left = newRoot->right;
-			newRoot->right = this;
-			return newRoot;
+		Node* rotate_l() {
+			Node* new_root = this->left;
+			this->left = new_root->right;
+			new_root->right = this;
+			return new_root;
 		}
 
-		Node* rotateR() {
-			Node* newRoot = this->right;
-			this->right = newRoot->left;
-			newRoot->left = this;
-			return newRoot;
+		Node* rotate_r() {
+			Node* new_root = this->right;
+			this->right = new_root->left;
+			new_root->left = this;
+			return new_root;
 		}
 	};
 

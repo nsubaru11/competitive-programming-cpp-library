@@ -11,16 +11,16 @@ using namespace std;
 template <typename T>
 	requires totally_ordered<T>
 class Arrays {
-	int size, shiftCount;
+	int size, shift_count;
 	T* arr;
 
-	[[nodiscard]] int toIndex(const int index) const { return ((index - shiftCount) % size + size) % size; }
+	[[nodiscard]] int to_index(const int index) const { return ((index - shift_count) % size + size) % size; }
 
 public:
-	explicit Arrays(int size = 1024, int shiftCount = 0, T arr[] = nullptr) {
+	explicit Arrays(int size = 1024, int shift_count = 0, T arr[] = nullptr) {
 		this->arr = arr == nullptr ? new T[size] : arr;
 		this->size = size;
-		this->shiftCount = shiftCount;
+		this->shift_count = shift_count;
 	}
 
 	~Arrays() { delete[] arr; }
@@ -28,32 +28,32 @@ public:
 	T& operator[](int index) {
 		if (index < 0 || index >= this->size) {
 			throw out_of_range("ArrayIndexOutOfBoundsException: Index" + to_string(index) +
-							   "out of bounds for length " + to_string(this->size));
+					"out of bounds for length " + to_string(this->size));
 		}
-		return this->arr[toIndex(index)];
+		return this->arr[to_index(index)];
 	}
 
-	void rShift(int cnt = 1) {
-		this->shiftCount += cnt;
-		this->shiftCount %= this->size;
+	void rotate_right(int cnt = 1) {
+		this->shift_count += cnt;
+		this->shift_count %= this->size;
 	}
 
-	void lShift(int cnt = 1) {
-		this->shiftCount -= cnt;
-		this->shiftCount %= this->size;
+	void rotate_left(int cnt = 1) {
+		this->shift_count -= cnt;
+		this->shift_count %= this->size;
 	}
 
 	void fill(T value) {
 		for (int i = 0; i < this->size; i++) {
-			this->arr[toIndex(i)] = value;
+			this->arr[to_index(i)] = value;
 		}
 	}
 
 	template <typename Func>
 		requires invocable<Func, int> && convertible_to<invoke_result_t<Func, int>, T>
-	void setAll(Func function) {
+	void set_all(Func function) {
 		for (int i = 0; i < this->size; i++) {
-			this->arr[toIndex(i)] = function(i);
+			this->arr[to_index(i)] = function(i);
 		}
 	}
 };

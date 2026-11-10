@@ -2,7 +2,7 @@
 #include <vector>
 using namespace std;
 
-void add1(vector<int> &v) {
+void add1(vector<int>& v) {
 	for (int i = 0; i < v.size(); i++) {
 		v[0] += 1;
 	}
