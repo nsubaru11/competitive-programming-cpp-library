@@ -79,3 +79,10 @@ cmake-build-*/
 .env
 .env.*
 session.txt
+
+# ローカルAIアシスタントの個人設定
+.claude/local/
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+.claude/worktrees/
+CLAUDE.local.md
