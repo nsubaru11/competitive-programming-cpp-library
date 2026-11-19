@@ -38,6 +38,7 @@
 
 ## Documentation Conventions
 
+- Use polite Japanese (です・ます) for reader-facing explanations and steps. Use plain directives (〜する / 〜しない) in Japanese instructions for AI agents. Keep parallel list items in the same grammatical form. End sentences with 。 and leave short labels and names unpunctuated. Use paragraphs for connected conditions or explanations and numbered lists for sequential steps.
 - Follow the Documentation Conventions of the [Java library's AGENTS.md](https://github.com/nsubaru11/competitive-programming-java-library/blob/main/AGENTS.md) where they apply: concise Japanese, relative links, and claims verified against `src/`.
 - A module README (`docs/<package>/README.md`) is a table of headers and a one-line description of each. The example under `test/example/` is the canonical usage, so do not embed per-class code blocks.
 
